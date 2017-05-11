@@ -1,0 +1,63 @@
+predict (userData, date)
+{
+	CashAccounts = userData.cashAccounts
+	SavingsAccounts = userData.savingsAccounts
+	
+	For each Day up to Date
+	{
+		For everything
+			initialize(day)
+		
+		
+		For each SavingsAcccount	
+			if (SavingsAccount.contributionToday(day))
+			{
+				SavingsAccount.processContribution(day) //Update value of savings and source, update nextContrDate, add to transactionHistory for day
+			}	
+}
+
+initialize(day)
+{
+	For Each Account
+	{
+		Account.initCurrentDay(day)
+	}
+	For Each SavingsAccount
+	{
+		SavingsAccount.initCurrentDay(day)
+	}
+	
+}
+
+Account.initCurrentDay(day)
+{
+	Account.setValueForDay(day, Account.getValueForPreviousDay(day))
+}
+
+SavingsAccount.initCurrentDay(day)
+{
+	this.setValueForDay(day, previousDayRow.value)
+	this.setNextContributionDateForDay(day, previousDayRow.nextContributionDate())
+}
+
+SavingAccount.processContribution(day)
+{
+	if (savingsAccount.nextContributionIsDay(day))
+	{
+		
+	}
+	else
+	{
+		populateDayWithPrevious(day)
+	}
+}
+
+//Sample
+
+//Cash Account
+Account("Covantage Credit Union", $2000, YesQL)
+
+//Savings Account
+SavingsAccount("Emergency", $110, YesQL, NoGoalSet,
+	07/01/2016, NoGoalDate, Contribution($100, Monthly, Covantage),
+	Ongoing)

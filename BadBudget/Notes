@@ -1,0 +1,22 @@
+TODO
+5/26 - Think I may have savings accounts without a need for contribution or goal. But for now will keep as is
+5/27 - Should change double for money into BigDecimal if I want it to be more accurate. May want to update
+so predict deposits and withdrawals don't occur in preiction class.
+5/28 - Thinking of making moneyOwed a subclass of account? Otherwise predictDataAccount maybe shouldn't be superclass of
+predictDataMoneyOwed
+5/29 - test verify for payments more thourougly.
+5/31 - Add in transfers
+5/31 - BudgetItems with biweekly frequency. When do they reset and how do they reset?
+6/01 - Milliseconds for numDayBetween could overflow earlier than I thought?
+6/03 - May want to make a proratedStart illegal if startDate is on the reset date
+6/03 - Bug in prorated loss unhandled frequency if proration set to true.
+6/04 - Unfinished Analysis method in Prediction class.
+6/13 - Update uses of BadBudget Data to use collection rather than list.
+
+Done
+5/27 - Bug in prediction for savings account, don't update date for rows correctly. Still works because I calculate
+it using dayIndex. Tried to use that date in MoneyGain and it broke so fix should be there. 5/28
+5/27 - Missing check for endDate for savings accounts in prediction algorithm I believe, also maybe add ongoing functionality and test 5/28
+5/29 - Bug with money owed object without a payment, need to handle this case. 5/29
+6/02 - End days of the month breaking proration and next reset methods in budget class 6/03
+

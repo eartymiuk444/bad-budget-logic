@@ -1,0 +1,108 @@
+Notes/Questions
+ What happens when a savings goal is reached?
+4/18 - Keep working here, HandleContribution TODO?
+4/19 - Ditto
+4/20 - Starting working with MoneyGain class.
+4/21 - Should work out prediction algorithm, need to know about data structures and copies
+		- Was working with Payments
+4/24 - Working with payments copy method, but started in on thinking more about prediction algorithm
+		- made a diagram.
+4/26 - Have option for budget auto update. Should add option for auto updating other accounts
+		- May want to move nextDate for Payments into MoneyOwed class, along with its calculation
+		- or maybe have savings account with multiple contributions
+ 
+		- Wrote out some basic structure to start and try implementing for use in the prediction algorithm
+		- Put everything in main package, made new package for predict data classes.
+4/27 - Wrote predict data classes. Just realized need to add access to next Dates to update those. Finished with
+ 			predict money gain. After that should move on to adding to respective classes and fix any lingering
+ 			discrepencies (contribution single to multiple)
+  
+4/28 - Wrote the getters and setters best I could for predict data classes. Started incorporating into Account class
+			the predictData. Still working on how access/update will work. Think I'll implement best I can try adjust later.
+ 
+4/29 - Continue work on predictData withdraw and deposit. Think just implement best account and savings, some classing issues
+		but could work out a bit later.
+		
+4/30 - Wrote predict withdraw and deposit for account class. Now thinking about savings account and if I should have multiple contributions
+		In flux right now SavingsAccount, Contribution, PredictDataSavings. Think I'm only going to do one contribution.
+		
+5/7 - Worked on putting mocks into pencil.
+5/16 - Putting mocks in pencil yet, working on add payment page. Thinking about multiple vs. single payments yet.
+5/17 - Almost copied over from online mocks to pencil. A few things coming up to consider: Budgeting New Item when to add: only two choices? Editing items
+should I mock these up right away? Next just copy over stragglers from online and just consider overall flow of mock and maybe add/adjust things. Otherwise could jump into coding
+again.
+5/18 - got the rest of what i needed from ninja mock and deleted account. Worked on getting html file mockup to load on android device. Finally
+got it. Had to put all pages into same directory as html file, then had to adjust html file to link to the same directory.
+Android firefox might not have access to other folders? Unsure. Next step looking at mocks on device and thinking about flow
+and design, making changes, then switching back to code. Unminify useful for viewing nice html. Hint.
+
+5/19 - Got mocks looking halfway decent. Switched back to considering code. Getting back up to speed on data structures and the prediction algorithm. Think only going to have
+one payment and contribution for moneyOwed and SavingsAccounts.
+
+5/20 - 5:45AM-7:45AM - Working on PsuedoPredict. Thinking it is looking pretty good. Just want to keep considering it and writing psudo code for specific object method. One
+thing that just came up was making sure everything is ready for a transaction. Think it might be ok but it would depend on order, for example need accoutn before savings.
+Think I'll initialize first to be safe for changes later. Next step to move on to fitting all the predict rows correctly into actual classes, then actual predict algorithm.
+
+5/21 - 8:57PM - 10:57PM - A bit all over. Noted relationships between objects a bit complicated. 
+Ended working on the MoneyLoss class. Want to implement that and the BudgetItem class. Then move back to implementing rough predict
+algorithm and fix up make sure classes have what I need as I go. Maybe if notice something big take the time to implement that before proceeding. 
+
+5/22 - 7:58AM-11:15AM - Still all over, things are growing pretty quick. Think all the basic parts are there. Might try to start implementing prediction algorithm with just a subset
+of the classes (maybe cash accounts and savings goals first). Then add incrementally. Would have to resolve any compile time errors to test, however. Started in on this idea in BBDriver.
+ 
+5/22 - 3:21PM-6:00PM - Working on the prediction algorithm using just account and savings account+contribution. More
+going into it than I thought. Noticing some classing irregularities (SavingsAccount has two list of predict data??). 
+But think first pass through coding for just these is about done. Should look over then maybe think of trying to 
+run and test. Then maybe rethink class structure/code structure.
+
+5/23 - 6:15-8:15AM - Got the prediction working with just accounts and savings accounts. Only tested with two, however. Now am looking over the classes involved and checking issues. Wrote
+some down in thinkpad. Another that comes up is breaking up prediction algorithm in more modular parts with methods broken out.
+
+5/24 - 5:45AM-7:45AM - Made Prediction method more modular. Now working on doing verification for savings Account in the constructor. Will need to write exception and currently working 
+in prediction class with finding the goal date given other 2. Prediction class is becoming a useful place with multiple utility methods. Most make sense I  believe. Can look to thinkpad for
+more on what I'm doing/what I'd like to do next.
+
+5/25 - 5:45AM-7:45AM - Wrote verfication method for savings account data along with exception and findGoalDate methods for use with that. Now thinking about how to correctly incorporate
+reaching a goal amount (both during prediction and if updating automatically). Set nextContribution to null and check for that during handleContributionsMethod?
+
+5/26 - 5:45AM-7:45AM - Working on getting moneyGains integrated into predictions. Currently adding predict data to MoneyGain class along with accessor methods (getters/setters) following
+account example. Also working in Prediction class for this as I implement new method and also adjust initialization method.
+
+5/27 - 6PM-9PM - Worked on getting MoneyGains integrated. Basics are implemented still need to address end dates. Also found some issues and wrote those in the notes involving savings account.
+Think I'll try to address and clean up what I have so far. Tried running treating savings account as my money losses works pretty good and seems pretty cool! Forward...
+
+5/28 - 7:15AM-11:00AM - Worked on finishing moneyGains and savings accounts with their endDates and more subtle rules. Think they look fairly decent. May want to address ongoing and make
+logic more clear. Moved onto MoneyOwed and got the basic implemented and am moving on to more subtle details. Still thinking about implications of separating loans, credit cards, and misc.
+Currently working in prediction with the moneyowed balance being reduced to zero. Debating if I should make a transaction log for this.
+
+5/29 - 7:40AM-11:00AM - Focused on writing MoneyOwed verify method for payments. Believe I got this working, tested a few cases but wasn't absolute may want to test more. Verify ends up 
+happening when a payment is added not in the payment constructor. Fixed bug where no payment being set broke predictions. Next steps might be adding in money losses as I would want to make
+credit cards a way of paying for those losses, but not loans or misc. 
+
+5/30 - 6:45AM-10:00AM - Worked on implementing money losses. Decided to make a source interface rather than subclass account for moneyOwed because loans can't be used as source. Might
+revisit later. I believe just finished money losses. Ended with checking the enddate didn't get to test, however, may want to start here. Next steps may want to think about other money owed
+object like loans and misc. Or could move to budget items and the budget in general. Looking decent.
+
+5/31 - 5:45AM-7:45AM - Working on budgetItems and the budget. Thinking about making budgetItems a subclass of moneyLoss as it really is. Also thinking about implications of doing this and 
+differeneces between budgetItems and moneyLosses in prediction algorithm. One thing is the proration and taking only that amount out to start. The other is the reset date is going to be
+the loss date and also budgetItems of the same frequency all reset on the same day. Going to keep plugging.
+
+5/31 - 6:30PM-8:30PM - Working with budget and budgetItems. Made a subclass of MoneyLoss and copied prediction code for money loss mostly. Started in on changing it for proration. 
+Ended thinking about how to calculate proration amount, found biweekly wasn't going to work nicely so for now going to exclude (i.e. just use full amount and go two weeks off start).
+Going to keep working on getting this going. Then test or integrating into android?
+
+6/01 - 5:45AM-7:45AM - Worked on budgetItems proration amount. Believe I implemented monthly the way I would like. Now need to extend to year and weekly. Deleted Daily, Weekly, and Monthly
+enumerations and am using Calendar's constants instead.
+
+6/01 - 7:00PM-8:30PM - Still working on proration method. Think I got month and weekly done. May want to add yearly in later but for now deciding to omit. Could test think about a bit more
+and/or move on to budget items in the prediction algorithm.
+
+6/02 - 5:45AM-7:45AM - STILL WORKING ON BUDGET ITEMS. It is a pain. Maybe take a step back and draw out method algorithms first. Believe the prediction has all the right logic just need
+to implement the two mehtods. Think I could use the nextReset method in the prorate amount method. Thinking about proration and only being weekly and monthly and what this means.
+
+6/03 - 5:45AM-7:45AM - Believe I've worked out budget items mostly including proration methods. Found a bug (see notes) but overall seems to work well. Now just looking over and testing
+things. May add a few more utility methods (like toggle functionality and analyze funds/total gain/loss) think of moving onto UI/Database implications and how to implement/start implementing
+or playing around.
+
+6/04 - 6:45AM-10:30AM - Started by thinking a bit about an analysis method but going to put that on hold for now. Moved on to experimenting/exploring android studio and making an android project
+the user interface, activities, background colors, database integration. Still some more to do yet. If I'm going to work remotemly will need to setup android studio on laptop.
