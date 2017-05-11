@@ -16,6 +16,8 @@ import com.erikartymiuk.badbudgetlogic.predictdataclasses.*;
  */
 public class Prediction {
 	
+	public static final double NUM_DAYS_IN_YEAR = 365.25;
+	
 	/**
 	 * Main method for the prediction class. Static method that will populate all the user objects
 	 * with correct values for days between currentDate and targetDate. A new call to predict using
@@ -299,7 +301,7 @@ public class Prediction {
 					if (currDebt instanceof CreditCard)
 					{
 						CreditCard currCreditCard = (CreditCard) currDebt;						
-						predictDataAll.updateValue(predictDataAll.value() * (1+currCreditCard.interestRate()/365.25));
+						predictDataAll.updateValue(predictDataAll.value() * (1+currCreditCard.interestRate()/NUM_DAYS_IN_YEAR));
 					}
 					else if (currDebt instanceof Loan)
 					{
@@ -308,14 +310,14 @@ public class Prediction {
 	
 						if (currLoan.isSimpleInterest())
 						{
-							double simpleInterest = pdl.getPrincipal() * (currLoan.interestRate()/365.25);
+							double simpleInterest = pdl.getPrincipal() * (currLoan.interestRate()/NUM_DAYS_IN_YEAR);
 							
 							pdl.updateValue(pdl.value() + simpleInterest);
 							pdl.setInterest(pdl.getInterest()+simpleInterest);
 						}
 						else
 						{	
-							double compoundedInterest = pdl.value() * currLoan.interestRate()/365.25;
+							double compoundedInterest = pdl.value() * currLoan.interestRate()/NUM_DAYS_IN_YEAR;
 							
 							pdl.updateValue(pdl.value() + compoundedInterest);
 							pdl.setPrincipal(pdl.value());
@@ -325,7 +327,7 @@ public class Prediction {
 					else
 					{
 						PredictDataMoneyOwed pdmo = currDebt.getPredictData(dayIndex);
-						pdmo.updateValue(currDebt.amount() * (1+currDebt.interestRate()/365.25));
+						pdmo.updateValue(currDebt.amount() * (1+currDebt.interestRate()/NUM_DAYS_IN_YEAR));
 					}
 					
 					Calendar updateNextInterestCal = Calendar.getInstance();
@@ -884,7 +886,7 @@ public class Prediction {
 	public static double findPaymentAmountSimpleInterest(Date startDate, int daysBeforeFirstPayment, Date goalDate,
 			Frequency freq, double debtAmount, double interestRate, double principal)
 	{
-		double interestRateConstant = (interestRate/365.25);
+		double interestRateConstant = (interestRate/NUM_DAYS_IN_YEAR);
 		double initialInterest = principal * (interestRateConstant * daysBeforeFirstPayment);
 		double interest = (debtAmount - principal) + initialInterest;
 		
@@ -1036,7 +1038,7 @@ public class Prediction {
 	public static double findPaymentAmountCompoundInterest(Date startDate, int daysBeforeFirstPayment, Date goalDate,
 			Frequency freq, double debtAmount, double interestRate)
 	{
-		double interestRateConstant = (1+interestRate/365.25);
+		double interestRateConstant = (1+interestRate/NUM_DAYS_IN_YEAR);
 		
 		Calendar currentPaymentCal = Calendar.getInstance();
 		currentPaymentCal.setTime(startDate);
@@ -1419,7 +1421,7 @@ public class Prediction {
 		double currInterest = debtAmount - principal;
 		
 		//Add in initial interest
-		currInterest = currInterest + principal * (interestRate/365.25) * daysBeforeFirstPayment;
+		currInterest = currInterest + principal * (interestRate/NUM_DAYS_IN_YEAR) * daysBeforeFirstPayment;
 		
 		//Make the first payment
 		if (paymentAmount > currInterest)
@@ -1449,7 +1451,7 @@ public class Prediction {
 				return -1;
 			}
 			
-			currInterest = currInterest + principal * (interestRate/365.25) * daysBeforeNextPayment;
+			currInterest = currInterest + principal * (interestRate/NUM_DAYS_IN_YEAR) * daysBeforeNextPayment;
 			if (paymentAmount > currInterest)
 			{
 				double paymentRemain = paymentAmount - currInterest;
@@ -1491,7 +1493,7 @@ public class Prediction {
 		double currInterest = debtAmount - principal;
 		
 		//Add in initial interest
-		currInterest = currInterest + principal * (interestRate/365.25) * daysBeforeFirstPayment;
+		currInterest = currInterest + principal * (interestRate/NUM_DAYS_IN_YEAR) * daysBeforeFirstPayment;
 		
 		//Make the first payment
 		if (paymentAmount > currInterest)
@@ -1519,7 +1521,7 @@ public class Prediction {
 				return null;
 			}
 			
-			currInterest = currInterest + principal * (interestRate/365.25) * daysBeforeNextPayment;
+			currInterest = currInterest + principal * (interestRate/NUM_DAYS_IN_YEAR) * daysBeforeNextPayment;
 			if (paymentAmount > currInterest)
 			{
 				double paymentRemain = paymentAmount - currInterest;
@@ -1558,7 +1560,7 @@ public class Prediction {
 		double totalInterest = 0;
 		//Add in initial interest and apply first payment
 		double tempDebtAmount = debtAmount;
-		debtAmount = debtAmount * Math.pow(1+interestRate/365.25, daysBeforeFirstPayment);
+		debtAmount = debtAmount * Math.pow(1+interestRate/NUM_DAYS_IN_YEAR, daysBeforeFirstPayment);
 		totalInterest += (debtAmount - tempDebtAmount);
 		debtAmount -= paymentAmount;
 				
@@ -1574,7 +1576,7 @@ public class Prediction {
 				return -1;
 			}
 			tempDebtAmount = debtAmount;
-			debtAmount = debtAmount * Math.pow(1+interestRate/365.25,  daysBeforeNextPayment);			
+			debtAmount = debtAmount * Math.pow(1+interestRate/NUM_DAYS_IN_YEAR,  daysBeforeNextPayment);			
 			totalInterest += (debtAmount - tempDebtAmount);
 			debtAmount-=paymentAmount;
 						
@@ -1603,7 +1605,7 @@ public class Prediction {
 			Frequency freq, double debtAmount, double interestRate, Date goalLimit)
 	{
 		//Add in initial interest and apply first payment
-		debtAmount = debtAmount * Math.pow(1+interestRate/365.25, daysBeforeFirstPayment) - paymentAmount;
+		debtAmount = debtAmount * Math.pow(1+interestRate/NUM_DAYS_IN_YEAR, daysBeforeFirstPayment) - paymentAmount;
 		Date lastPayment = startDate;
 		Date nextPayment = Payment.determineNextPayment(startDate, freq);
 		int daysBeforeNextPayment = Prediction.numDaysBetween(lastPayment, nextPayment);
@@ -1616,7 +1618,7 @@ public class Prediction {
 			{
 				return null;
 			}
-			debtAmount = debtAmount * Math.pow(1+interestRate/365.25,  daysBeforeNextPayment);
+			debtAmount = debtAmount * Math.pow(1+interestRate/NUM_DAYS_IN_YEAR,  daysBeforeNextPayment);
 			debtAmount-=paymentAmount;
 			lastPayment = nextPayment;
 			nextPayment = Payment.determineNextPayment(lastPayment, freq);
@@ -1658,12 +1660,12 @@ public class Prediction {
 			}
 			case monthly:
 			{
-				dailyAmount = (dailyAmount*12)/365;
+				dailyAmount = (dailyAmount*12)/NUM_DAYS_IN_YEAR;
 				break;
 			}
 			case yearly:
 			{
-				dailyAmount/=365;
+				dailyAmount/=NUM_DAYS_IN_YEAR;
 				break;
 			}
 			default:
@@ -1690,11 +1692,11 @@ public class Prediction {
 			}
 			case monthly:
 			{
-				return (dailyAmount * 365)/12;
+				return (dailyAmount * NUM_DAYS_IN_YEAR)/12;
 			}
 			case yearly:
 			{
-				return dailyAmount * 365;
+				return dailyAmount * NUM_DAYS_IN_YEAR;
 			}
 			default:
 			{
@@ -1748,7 +1750,336 @@ public class Prediction {
 			System.out.println(descriptionKey + ": " + currAmount);
 		}
 		System.out.println("Net: " + net);
+	}
+	
+	/**
+	 * Determines if a bbd object with the given dates should be considered as having valid dates for the
+	 * given chosen user date at the given frequency.
+	 * To be valid the end date for a bbd object must come after
+	 * the chosen date (not strict) (which should be restricted to being on or after today's date)
+	 * End date can also be null indicating an ongoing transaction. 
+	 * Then either the next date must be before or on the chosen date or 
+	 * one freq period before the next date must be before or on the chosen date.
+	 * 
+	 * This method should be called only when considering bbd objects that have been updated to today's
+	 * date. (i.e. the next date shouldn't be on today's date unless the end date was hit in the past).
+	 * 
+	 * @param chosenDate - the user selected date (assumed to be on or after the date of today)
+	 * @param nextDate - the next date of a bbd object transaction
+	 * @param endDate - the end date of a bbd object transaction
+	 * @param freq - the frequency of a bbd object transaction
+	 * @return - whether these dates represent a considerable next date for a bbd object transaction
+	 */
+	public static boolean considerableNextDate(Date chosenDate, Date nextDate, Date endDate, Frequency freq)
+	{		
+		if (chosenDate == null || nextDate == null || freq == null || 
+				!(endDate == null || Prediction.numDaysBetween(nextDate, endDate) >= 0))
+		{
+			return false;
+		}
+		
+		Calendar prevCal = Calendar.getInstance();
+		prevCal.setTime(nextDate);
+		switch (freq)
+		{
+			case oneTime:
+			{
+				return false;
+			}
+			case daily:
+			{
+				prevCal.add(Calendar.DAY_OF_YEAR, -1);
+				break;
+			}
+			case weekly:
+			{
+				prevCal.add(Calendar.WEEK_OF_YEAR, -1);
+				break;
+			}
+			case biWeekly:
+			{
+				prevCal.add(Calendar.WEEK_OF_YEAR, -2);
+				break;
+			}
+			case monthly:
+			{
+				prevCal.add(Calendar.MONTH, -1);
+				break;
+			}
+			case yearly:
+			{
+				prevCal.add(Calendar.YEAR, -1);
+				break;
+			}
+			default:
+			{
+				return false;
+			}
+		}
+		Date prevDate = prevCal.getTime();
+		boolean validEndDate = endDate == null || Prediction.numDaysBetween(chosenDate, endDate) >= 0;
+		boolean validNextDate;
 
+		if (Prediction.numDaysBetween(chosenDate, nextDate) > 0)
+		{
+			validNextDate = Prediction.numDaysBetween(prevDate, chosenDate) >= 0;
+		}
+		else
+		{
+			validNextDate = true;
+		}
+		return validNextDate && validEndDate;
+	}
+	
+	/**
+	 * Given a bad budget data object, a frequency, and a chosen date; returns the gain per that frequency
+	 * of the bad budget data's gains excluding any that have ended or are not within a frequency period
+	 * back from the next date. (see considerableNextDate for more on considerable dates)
+	 * 
+	 * @param bbd - the bad budget data object to consider gains for
+	 * @param freq - the frequency to see our net gains at
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net gain amount for.
+	 * @return the net gain at the given frequency for gains inside of the considerable range
+	 */
+	public static double analyzeNetGainAtFreq(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		double netGainAtFreq = 0;
+		for (MoneyGain currGain : bbd.getGains())
+		{
+			if (considerableNextDate(chosenDate, currGain.nextDeposit(), currGain.endDate(), currGain.gainFrequency()))
+			{
+				double freqAmount = toggle(currGain.gainAmount(), currGain.gainFrequency(), freq);
+				netGainAtFreq += freqAmount;
+			}
+		}
+		return netGainAtFreq;
+	}
+	
+	/**
+	 * Given a bad budget data object, a frequency, and a chosen date; returns the loss per that frequency
+	 * of the bad budget data's losses excluding any that have ended or are not within a frequency period
+	 * back from the next date. Includes losses from budget items. (see considerableNextDate for more on considerable dates)
+	 * 
+	 * @param bbd - the bad budget data object to consider
+	 * @param freq - the frequency to see our net losses at
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return the net loss at the given frequency for losses inside of the considerable range
+	 */
+	public static double analyzeNetLossAtFreq(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		double netLossAtFreq = 0;
+		ArrayList<MoneyLoss> allLosses = new ArrayList<MoneyLoss>();
+		allLosses.addAll(bbd.getLosses());
+		allLosses.addAll(bbd.getBudget().getAllBudgetItems().values());
+		
+		for (MoneyLoss currLoss : allLosses)
+		{
+			if (considerableNextDate(chosenDate, currLoss.nextLoss(), currLoss.endDate(), currLoss.lossFrequency()))
+			{
+				double freqAmount = toggle(currLoss.lossAmount(), currLoss.lossFrequency(), freq);
+				netLossAtFreq += freqAmount;
+			}
+		}
+		
+		return netLossAtFreq;
+	}
+	
+	/**
+	 * Given a bad budget data object, a frequency, and a chosen date; returns the payments per that frequency
+	 * of the bad budget data's debts excluding any payments that have ended or are not within a frequency period
+	 * back from the next payment date. (see considerableNextDate for more on considerable dates). Debts with
+	 * payments set to payoff are not included in this net amount.
+	 * @param bbd - the bad budget data object to consider payments for
+	 * @param freq - the frequency to see our net payments at
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return the net payment at the given frequency for payments inside of the considerable range (excluding payoffs and debts
+	 * 			without payments)
+	 */
+	public static double analyzeNetPaymentsAtFreq(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		double netPaymentAtFreq = 0;
+		for (MoneyOwed currDebt : bbd.getDebts())
+		{
+			Payment currPayment = currDebt.payment();
+			if (currPayment != null && !currPayment.payOff() && 
+					considerableNextDate(chosenDate, currPayment.nextPaymentDate(), currPayment.endDate(), currPayment.frequency()))
+			{
+				double freqAmount = toggle(currPayment.amount(), currPayment.frequency(), freq);
+				netPaymentAtFreq+=freqAmount;
+			}
+		}
+		return netPaymentAtFreq;
+	}
+	
+	/**
+	 * Given a bad budget data object, a frequency, and a chosen date; returns the contribution per that frequency
+	 * of the bad budget data's contributions excluding any that have ended or are not within a frequency period
+	 * back from the next date. (see considerableNextDate for more on considerable dates)
+	 * 
+	 * @param bbd - the bad budget data object to consider
+	 * @param freq - the frequency to see our net contributions at
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return the net contribution at the given frequency for contributions inside of the considerable range
+	 */
+	public static double analyzeNetContributionsAtFreq(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		double netContributionAtFreq = 0;
+		for (Account currAccount : bbd.getAccounts())
+		{
+			if (currAccount instanceof SavingsAccount)
+			{
+				SavingsAccount currSavingsAccount = (SavingsAccount)currAccount;
+				Contribution currContribution = currSavingsAccount.contribution();
+				if (currContribution != null && considerableNextDate(chosenDate, currSavingsAccount.nextContribution(), currSavingsAccount.endDate(), freq))
+				{
+					double freqAmount = toggle(currContribution.getContribution(), currContribution.getFrequency(), freq);
+					netContributionAtFreq+=freqAmount;
+				}
+			}
+		}
+		return netContributionAtFreq;
+	}
+	
+	/**
+	 * Returns the net gains subtracted from the net losses using analyzeNetGainAtFreq and analyzeNetLossAtFreq.
+	 * @param bbd - the bad budget data to calculate net gains minus losss for
+	 * @param freq - the freq at which to consider the gains minus losses for
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return the net gain - loss amount at the given freq for bbd objects
+	 */
+	public static double analyzeGainsLosses(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		return analyzeNetGainAtFreq(bbd, freq, chosenDate) - analyzeNetLossAtFreq(bbd, freq, chosenDate);
+	}
+	
+	/**
+	 * Returns the net gains subtracted from the net losses, payments, and contributions using analyzeNetGainAtFreq,
+	 * analyzeNetLossAtFreq, analyzeNetPaymentsAtFreq, and analyzeNetContributionsAtFreq.
+	 * @param bbd - the bad budget data to calculate for
+	 * @param freq - the freq to consider
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return gains - losses - payments - contributions for the bbd objects at the given freq.
+	 */
+	public static double analyzeGainsLossesPaymentsContributions(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		return analyzeGainsLosses(bbd, freq, chosenDate) - 
+				analyzeNetPaymentsAtFreq(bbd, freq, chosenDate) - 
+				analyzeNetContributionsAtFreq(bbd, freq, chosenDate);
+	}
+	
+	/**
+	 * Returns the total outgoing money (losses plus payments and contributions) at the given freq
+	 * @param bbd - the bad budget data to calculate for
+	 * @param freq - the freq to consider
+	 * @param chosenDate - the user chosen date (should be greater equal or greater than today's date) to
+	 * 						see the net amount for.
+	 * @return the outgoing money (a positive value when money is leaving)
+	 */
+	public static double analyzeLossesPaymentsContributions(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		return analyzeNetLossAtFreq(bbd, freq, chosenDate) + 
+				analyzeNetPaymentsAtFreq(bbd, freq, chosenDate) + 
+				analyzeNetContributionsAtFreq(bbd, freq, chosenDate);
+	}
+	
+	/**
+	 * Looks through all ways that money can leave (i.e. makes the user's net worth lower). These ways include losses (including
+	 * losses from budget items), payments to debts, and contributions to savings accounts. For each way money leaves this method
+	 * gets that money out source and adds it to a running net of money out at the specified freq and within a considerable date.
+	 * Returns a map from a source to the net money out from that source for the given freq and within the considerable date. 
+	 * For sources that are sources for debt payments that have payoff specified: it should be noted that the payoff amount is
+	 * excluded from the money out result.(To account for the payoff amount the user would need to consider the debt as a source itself).
+	 * @param bbd - the bad budget data
+	 * @param freq - the frequency to consider
+	 * @param chosenDate - the date to consider for considerable dates. (see considerableNextDate for more)
+	 * @return a map of sources to the money leaving through that source at the given freq and within the considerable date range
+	 */
+	public static HashMap<Source, Double> analyzeSourceMoneyOut(BadBudgetData bbd, Frequency freq, Date chosenDate)
+	{
+		HashMap<Source, Double> sourcesMoneyOut = new HashMap<>();
+		
+		ArrayList<MoneyLoss> allLosses = new ArrayList<MoneyLoss>();
+		allLosses.addAll(bbd.getLosses());
+		allLosses.addAll(bbd.getBudget().getAllBudgetItems().values());
+		
+		//Check all losses and budget items. Add their sources to the map.
+		for (MoneyLoss currLoss : allLosses)
+		{
+			if (considerableNextDate(chosenDate, currLoss.nextLoss(), currLoss.endDate(), currLoss.lossFrequency()))
+			{
+				Source source = currLoss.source();
+				Double currSourceMoneyOut = sourcesMoneyOut.get(source);
+				
+				double freqAmount = toggle(currLoss.lossAmount(), currLoss.lossFrequency(), freq);
+
+				if (currSourceMoneyOut == null)
+				{
+					sourcesMoneyOut.put(source, freqAmount);
+				}
+				else
+				{
+					sourcesMoneyOut.put(source, currSourceMoneyOut + freqAmount);
+				}
+			}
+		}
+		
+		//Consider all savings accounts. Add the sources for their contributions to the map.
+		for (Account currAccount : bbd.getAccounts())
+		{
+			if (currAccount instanceof SavingsAccount)
+			{
+				SavingsAccount currSavingsAccount = (SavingsAccount)currAccount;
+				Contribution currContribution = currSavingsAccount.contribution();
+				if (currContribution != null && 
+						considerableNextDate(chosenDate, currSavingsAccount.nextContribution(), currSavingsAccount.endDate(), freq))
+				{
+					Account accountSource = currSavingsAccount.sourceAccount();
+					Double currSourceMoneyOut = sourcesMoneyOut.get(accountSource);
+					
+					double freqAmount = toggle(currContribution.getContribution(), currContribution.getFrequency(), freq);
+					
+					if (currSourceMoneyOut == null)
+					{
+						sourcesMoneyOut.put(accountSource, freqAmount);
+					}
+					else
+					{
+						sourcesMoneyOut.put(accountSource, currSourceMoneyOut + freqAmount);
+					}
+				}
+			}
+		}
+		
+		//Consider all debts. Any debt with a payment that doesn't have payoff set can be added to our map.
+		for (MoneyOwed currDebt : bbd.getDebts())
+		{
+			Payment currPayment = currDebt.payment();
+			if (currPayment != null && !currPayment.payOff() && 
+					considerableNextDate(chosenDate, currPayment.nextPaymentDate(), currPayment.endDate(), currPayment.frequency()))
+			{
+				Account accountSource = currPayment.sourceAccount();
+				Double currSourceMoneyOut = sourcesMoneyOut.get(accountSource);
+				
+				double freqAmount = toggle(currPayment.amount(), currPayment.frequency(), freq);
+				
+				if (currSourceMoneyOut == null)
+				{
+					sourcesMoneyOut.put(accountSource, freqAmount);
+				}
+				else
+				{
+					sourcesMoneyOut.put(accountSource, currSourceMoneyOut + freqAmount);
+				}
+			}
+		}
+		
+		return sourcesMoneyOut;
 	}
 	
 	/**
