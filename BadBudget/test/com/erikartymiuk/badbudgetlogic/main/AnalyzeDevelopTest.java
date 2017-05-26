@@ -55,73 +55,6 @@ public class AnalyzeDevelopTest {
 		assertTrue(netLoss > 0 && netLoss > 10000);
 	}
 	
-	@Test
-	public void sanityTest2() throws BadBudgetInvalidValueException {
-		
-		Calendar todayCal = new GregorianCalendar(2017, Calendar.MAY, 10);
-		Calendar nextDateCal = new GregorianCalendar(2017, Calendar.MAY, 11);
-		Calendar endDateCal = new GregorianCalendar(2017, Calendar.MAY, 11);
-		
-		BadBudgetData bbd = new BadBudgetData();
-		
-		Account account = new Account("account", 0, false);
-		Budget budget = new Budget(account, false, Calendar.SUNDAY, 1);
-		
-		bbd.setBudget(budget);
-		
-		MoneyGain gain = new MoneyGain("Gain", 985.91, Frequency.biWeekly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		bbd.addGain(gain);
-		
-		MoneyLoss github = new MoneyLoss("github", 7, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss gym = new MoneyLoss("gym", 33, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss internet = new MoneyLoss("internet", 33, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss phone = new MoneyLoss("phone", 45, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss prescription = new MoneyLoss("prescription", 35, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss rent = new MoneyLoss("rent", 599, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss tv = new MoneyLoss("tv", 30, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss utilities = new MoneyLoss("utilities", 20, Frequency.monthly, nextDateCal.getTime(), endDateCal.getTime(), account);
-		MoneyLoss insurance = new MoneyLoss("insurance", 500, Frequency.yearly, nextDateCal.getTime(), endDateCal.getTime(), account);
-
-		bbd.addLoss(github);
-		bbd.addLoss(gym);
-		bbd.addLoss(internet);
-		bbd.addLoss(phone);
-		bbd.addLoss(prescription);
-		bbd.addLoss(rent);
-		bbd.addLoss(tv);
-		bbd.addLoss(utilities);
-		bbd.addLoss(insurance);
-		
-		SavingsAccount savings = new SavingsAccount("savings", 0, false, false, -1, null, new Contribution(100, Frequency.weekly), account, nextDateCal.getTime(), null, true, 0);
-		bbd.addAccount(savings);
-		
-		MoneyOwed debt = new MoneyOwed("Debt", 10000, false, 0);
-		Payment payment = new Payment(950, false, Frequency.monthly, account, nextDateCal.getTime(), true, null, debt, null);
-		debt.setupPayment(payment);
-		bbd.addDebt(debt);
-		
-		double netGain = Prediction.analyzeNetGainAtFreq(bbd, Frequency.yearly, todayCal.getTime());
-		double netLoss = Prediction.analyzeNetLossAtFreq(bbd, Frequency.yearly, todayCal.getTime());
-		double netContr = Prediction.analyzeNetContributionsAtFreq(bbd, Frequency.yearly, todayCal.getTime());
-		double netPayment = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.daily, todayCal.getTime());
-		
-		double netOut = Prediction.analyzeGainsLossesPaymentsContributions(bbd, Frequency.daily, todayCal.getTime());
-		double netChange = Prediction.analyzeGainsLosses(bbd, Frequency.daily, todayCal.getTime());
-		double outAmt = Prediction.analyzeLossesPaymentsContributions(bbd, Frequency.daily, todayCal.getTime());
-		
-		double netIn = Prediction.analyzeNetGainAtFreq(bbd, Frequency.daily, todayCal.getTime());
-		
-		assertTrue(netIn == Prediction.toggle(netGain, Frequency.yearly, Frequency.daily));
-		assertTrue(netOut < 0);
-		assertTrue(netChange - 42.7 > 0);
-		assertTrue(outAmt > 0);
-		
-		assertTrue(netGain > 20000);
-		assertTrue(netLoss > 10000);
-		assertTrue( netContr > 5000);
-		assertTrue(netPayment > 30);
-	}
-	
 	//CNE - yes
 	//C=chosen, N=next, E=End
 	@Test
@@ -331,5 +264,60 @@ public class AnalyzeDevelopTest {
 		
 		boolean considerable = Prediction.considerableNextDate(chosenCal.getTime(), nextDateCal.getTime(), endDateCal.getTime(), Frequency.daily);
 		assertTrue(considerable);
+	}
+	
+	@Test
+	public void adjustAnalyzeTest2() throws BadBudgetInvalidValueException 
+	{
+		Calendar todayCal = new GregorianCalendar(2017, Calendar.APRIL, 15);
+		Calendar nextPayCal = new GregorianCalendar(2017, Calendar.MAY, 1);
+		Calendar chosenCal = new GregorianCalendar(2025, Calendar.MAY, 1);
+		
+		BadBudgetData bbd = new BadBudgetData();
+		Account account = new Account("account", 0, false);
+		CreditCard debt = new CreditCard("card", 3000, false, 0.1599);
+		Payment payment = new Payment(1250, false, Frequency.monthly, account, nextPayCal.getTime(), true, null, debt, null);
+		debt.setupPayment(payment);
+		
+		Budget budget = new Budget(debt, false, Calendar.SUNDAY, 1);
+		bbd.setBudget(budget);
+		bbd.addDebt(debt);
+		bbd.addAccount(account);
+		
+		double paymentsMonthly = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.monthly, chosenCal.getTime(), todayCal.getTime(), null);
+		assertTrue(paymentsMonthly==0.0);
+		
+		double paymentsYearly = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.yearly, chosenCal.getTime(), todayCal.getTime(), null);
+		assertTrue(paymentsYearly==0.0);
+	}
+	
+	@Test
+	public void adjustAnalyzeTest3() throws BadBudgetInvalidValueException 
+	{
+		Calendar todayCal = new GregorianCalendar(2017, Calendar.APRIL, 15);
+		Calendar nextPayCal = new GregorianCalendar(2017, Calendar.MAY, 1);
+		Calendar chosenCal = new GregorianCalendar(2025, Calendar.MAY, 1);
+		
+		BadBudgetData bbd = new BadBudgetData();
+		Account account = new Account("account", 0, false);
+		CreditCard debt = new CreditCard("card", 3000, false, 0.1599);
+		Payment payment = new Payment(1250, false, Frequency.monthly, account, nextPayCal.getTime(), true, null, debt, null);
+		debt.setupPayment(payment);
+		MoneyLoss loss = new MoneyLoss("loss", 800, Frequency.monthly, nextPayCal.getTime(), null, debt);
+		
+		Budget budget = new Budget(debt, false, Calendar.SUNDAY, 1);
+		bbd.setBudget(budget);
+		bbd.addDebt(debt);
+		bbd.addAccount(account);
+		bbd.addLoss(loss);
+		
+		double paymentsMonthly = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.monthly, chosenCal.getTime(), todayCal.getTime(), null);
+		assertTrue(paymentsMonthly==800.0);
+		
+		double paymentsYearly = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.yearly, chosenCal.getTime(), todayCal.getTime(), null);
+		assertTrue(paymentsYearly==800*12);
+		
+		double paymentsDaily = Prediction.analyzeNetPaymentsAtFreq(bbd, Frequency.daily, chosenCal.getTime(), todayCal.getTime(), null);
+		assertTrue(Math.abs(paymentsDaily-(9600/365.25)) < 0.0001);
 	}
 }
