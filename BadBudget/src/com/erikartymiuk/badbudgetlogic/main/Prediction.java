@@ -2111,7 +2111,7 @@ public class Prediction {
 				SavingsAccount currSavingsAccount = (SavingsAccount)currAccount;
 				Contribution currContribution = currSavingsAccount.contribution();
 				if (currContribution != null && 
-						considerableNextDate(chosenDate, currSavingsAccount.nextContribution(), currSavingsAccount.endDate(), freq))
+						considerableNextDate(chosenDate, currSavingsAccount.nextContribution(), currSavingsAccount.endDate(), currSavingsAccount.contribution().getFrequency()))
 				{
 					Account accountSource = currSavingsAccount.sourceAccount();
 					Double currSourceMoneyOut = sourcesMoneyOut.get(accountSource);
