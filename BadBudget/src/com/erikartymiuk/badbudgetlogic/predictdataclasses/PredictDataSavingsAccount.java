@@ -9,17 +9,29 @@ public class PredictDataSavingsAccount extends PredictDataAccount
 {	
 	private Date nextInterestAccumulationDate;
 	private Date nextContributionDate; //The date of the savings account next contribution for a particular day
+	private boolean valueChangedByTransfer; //Indicates if the value of this savings account was impacted by a transfer (for use in determining goal validity)
+	
 	/**
 	 * Constructor for the predict date savings account. 
 	 * @param date - the date this row has data on
 	 * @param value - the value on the date
 	 * @param nextDate - the next contribution date from the previous day (will be updated by prediction algorithm)
+	 * @param valueChangedByTransfer - indicates if the value of a savings account was impacted by a transfer (for use in determining goal validity)
 	 */
-	public PredictDataSavingsAccount(Date date, double value, Date nextDate, Date nextInterestAccumulationDate)
+	public PredictDataSavingsAccount(Date date, double value, Date nextDate, Date nextInterestAccumulationDate, boolean valueChangedByTransfer)
 	{
 		super(date, value);
 		this.nextContributionDate = nextDate;
 		this.nextInterestAccumulationDate = nextInterestAccumulationDate;
+		this.valueChangedByTransfer = valueChangedByTransfer;
+	}
+
+	public boolean isValueChangedByTransfer() {
+		return valueChangedByTransfer;
+	}
+
+	public void setValueChangedByTransfer(boolean valueChangedByTransfer) {
+		this.valueChangedByTransfer = valueChangedByTransfer;
 	}
 
 	public Date getNextInterestAccumulationDate() {

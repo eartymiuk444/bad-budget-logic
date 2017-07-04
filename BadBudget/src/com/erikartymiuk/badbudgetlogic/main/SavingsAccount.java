@@ -54,7 +54,8 @@ public class SavingsAccount extends Account
 	
 	/** 
 	 * Constructor for a SavingsAccount. Has various restrictions in addition to checks defined by Account
-	 * (see verifyValues for detailed specification)
+	 * (see verifyValues for detailed specification - although overrides error 1 allowing for savings account to have
+	 * negative balance)
 	 * 
 	 * @param name - User defined descriptor/name for this account
 	 * @param value - Current value of account
@@ -89,7 +90,8 @@ public class SavingsAccount extends Account
 		super(name, value, quickLook);
 		
 		int error = verifyValues(value, goalSet, goalAmount, goalDate, contribution, sourceAccount, nextContribution, endDate, ongoing, interestRate);
-		if (error == 0)
+		/* Going to allow savings accounts to have a negative value to allow transfers to pull out balance not there 7/13/2017 */
+		if (error == 0 || error == 1)
 		{
 			this.goalSet = goalSet;
 			this.goal = goalAmount;
@@ -557,7 +559,8 @@ public class SavingsAccount extends Account
 	
 	/**
 	 * After running the prediction algorithm this method updates this savings account's values to 
-	 * the value's it would have on the day represented by day index. 
+	 * the value's it would have on the day represented by day index. Also clears the goal if
+	 * the value of the savings account was impacted by a transfer. 
 	 * 
 	 * @param dayIndex - the day, as an offset from the start date used in the prediction algorithm, to update
 	 * 						this saving accounts values to.
@@ -568,6 +571,14 @@ public class SavingsAccount extends Account
 		PredictDataSavingsAccount pdsa = this.getPredictData(dayIndex);
 		Date uNextContributionDate = pdsa.getNextContributionDate();
 		this.nextContribution = uNextContributionDate;
+		
+		if (pdsa.isValueChangedByTransfer())
+		{
+			//Clear the goal
+			this.goalSet = false;
+			this.goal = -1;
+			this.goalDate = null;
+		}
 	}
 	
 	/**

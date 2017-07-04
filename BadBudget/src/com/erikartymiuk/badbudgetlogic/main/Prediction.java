@@ -65,7 +65,9 @@ public class Prediction {
 		{
 			//First initialize all rows for this day index
 			initializePredictRowsForDayIndex(currentUserValues, dayIndex, currentDate);
-			//After the row data is initialized, we can check for any contributions that occur on this day
+			//After the row data is initialized, we can check for any transfers that occur on this day
+			handleTransfersForDayIndex(currentUserValues.getTransfers(), dayIndex, currentDate);
+			//Next we can check for any contributions that occur on this day
 			handleContributionsForDayIndex(currentUserValues.getAccounts(), dayIndex, currentDate);
 			//Next we check for any moneyGains that occur on this day
 			handleGainsForDayIndex(currentUserValues.getGains(), dayIndex, currentDate);
@@ -103,7 +105,9 @@ public class Prediction {
 		{
 			//First initialize all rows for this day index
 			initializePredictRowsForDayIndex(currentUserValues, dayIndex, originalStart);
-			//After the row data is initialized, we can check for any contributions that occur on this day
+			//After the row data is initialized, we can check for any transfers that occur on this day
+			handleTransfersForDayIndex(currentUserValues.getTransfers(), dayIndex, originalStart);
+			//Next we can check for any contributions that occur on this day
 			handleContributionsForDayIndex(currentUserValues.getAccounts(), dayIndex, originalStart);
 			//Next we check for any moneyGains that occur on this day
 			handleGainsForDayIndex(currentUserValues.getGains(), dayIndex, originalStart);
@@ -117,6 +121,63 @@ public class Prediction {
 			handleDebtsInterestForDayIndex(currentUserValues.getDebts(), dayIndex, originalStart);
 			//Handle savings interest accumulation
 			handleSavingsInterestForDayIndex(currentUserValues.getAccounts(), dayIndex, originalStart);
+		}
+	}
+	
+	/** Private helper method. For a particular day, check for any money transfers that occur and handle them
+	 * 
+	 * @param transfers - a list of the transfers to consider
+	 * @param dayIndex - the day to consider given as an index (offset from the startDate)
+	 * @param startDate - the day the prediction started (typically the current day)
+	 * 
+	 */
+	private static void handleTransfersForDayIndex(ArrayList<MoneyTransfer> transfers, int dayIndex, Date startDate)
+	{
+		for (MoneyTransfer mt : transfers)
+		{				
+			PredictDataMoneyTransfer pdmt = mt.getPredictData(dayIndex);
+			Date nextTransfer = pdmt.nextTransfer();
+			Date rowDate = pdmt.date();
+			Date endDate = mt.getEndDate();
+			
+			//Check to see if we've hit the end date if it is set
+			boolean endDateHit = (endDate != null && numDaysBetween(rowDate, endDate) < 0);		
+			
+			if (!endDateHit && nextTransfer != null && datesEqualUpToDay(nextTransfer, rowDate))
+			{
+				//A money transfer happens on this day.
+				PredictDataAccount pdaSource = mt.getSource().getPredictData(dayIndex);
+				PredictDataAccount pdaDestination = mt.getDestination().getPredictData(dayIndex);
+				
+				//If either source or destination is a savings account we need to set the flag indicating
+				//that its value was changed by a transfer which is then propagated to the subsequent pdsa.
+				if (mt.getSource() instanceof SavingsAccount)
+				{
+					((PredictDataSavingsAccount)pdaSource).setValueChangedByTransfer(true);
+				}
+				
+				if (mt.getDestination() instanceof SavingsAccount)
+				{
+					((PredictDataSavingsAccount)pdaDestination).setValueChangedByTransfer(true);
+				}
+				
+				double originalSourceValue = pdaSource.value();
+				double originalDestinationValue = pdaDestination.value();
+				
+				pdaSource.updateValue(pdaSource.value() - mt.getAmount());
+				pdaDestination.updateValue(pdaDestination.value() + mt.getAmount());
+				
+				pdmt.updateNextTransfer(mt.calculateNextTransfer(pdmt.nextTransfer()));
+				
+				//Construct the transaction record for the source and destination accounts.
+				TransactionHistoryItem historyItem = new TransactionHistoryItem(rowDate, mt.getAmount(), TransactionHistoryItem.TRANSFER_SOURCE_ACTION, mt.getSource().name(), 
+						originalSourceValue, pdaSource.value(), TransactionHistoryItem.TRANSFER_DESTINATION_ACTION, 
+						mt.getDestination().name(), originalDestinationValue, pdaDestination.value(), 
+						true, true);
+				
+				pdaSource.addHistoryItem(historyItem);
+				pdaDestination.addHistoryItem(historyItem);
+			}
 		}
 	}
 	
@@ -556,6 +617,7 @@ public class Prediction {
 		ArrayList<MoneyGain> gains = data.getGains();
 		ArrayList<MoneyOwed> debts = data.getDebts();
 		ArrayList<MoneyLoss> losses = data.getLosses();
+		ArrayList<MoneyTransfer> transfers = data.getTransfers();
 				
 		Budget budget = data.getBudget();
 		
@@ -577,7 +639,7 @@ public class Prediction {
 					firstOfNextMonth.add(Calendar.MONTH, 1);
 										
 					PredictDataSavingsAccount firstRow = new PredictDataSavingsAccount(startingDate, 
-																						sa.value(), sa.nextContribution(), firstOfNextMonth.getTime());
+																						sa.value(), sa.nextContribution(), firstOfNextMonth.getTime(), false);
 					sa.setPredictData(dayIndex, firstRow);
 					//sa.addPredictData(firstRow);
 				}
@@ -585,7 +647,7 @@ public class Prediction {
 				{
 					PredictDataSavingsAccount yesterdayRow = sa.getPredictData(dayIndex - 1);
 					PredictDataSavingsAccount newRow = new PredictDataSavingsAccount(addDays(yesterdayRow.date(), 1), yesterdayRow.value(), 
-																					yesterdayRow.getNextContributionDate(), yesterdayRow.getNextInterestAccumulationDate());
+																					yesterdayRow.getNextContributionDate(), yesterdayRow.getNextInterestAccumulationDate(), yesterdayRow.isValueChangedByTransfer());
 					sa.setPredictData(dayIndex, newRow);
 					//sa.addPredictData(newRow);
 				}
@@ -606,6 +668,23 @@ public class Prediction {
 					a.setPredictData(dayIndex, newRow);
 					//a.addPredictData(newRow);
 				}
+			}
+		}
+		
+		//Initialize the money transfers
+		for (MoneyTransfer mt : transfers)
+		{
+			if (dayIndex == 0)
+			{
+				PredictDataMoneyTransfer pdmt = new PredictDataMoneyTransfer(startingDate, mt.getNextTransfer());
+				mt.setPredictData(dayIndex, pdmt);
+			}
+			else
+			{
+				PredictDataMoneyTransfer yesterdayRow = mt.getPredictData(dayIndex - 1);
+				PredictDataMoneyTransfer newRow = new PredictDataMoneyTransfer(addDays(yesterdayRow.date(), 1), yesterdayRow.nextTransfer());
+				
+				mt.setPredictData(dayIndex, newRow);
 			}
 		}
 		
@@ -2061,9 +2140,13 @@ public class Prediction {
 	
 	/**
 	 * Looks through all ways that money can leave. These ways include losses (including
-	 * losses from budget items), payments to debts, and contributions to savings accounts. For each way money leaves this method
+	 * losses from budget items), payments to debts, contributions to savings accounts, and transfers from one account to another.
+	 * (note however, that only if the source is a regular account does it get added to our map and savings accounts as sources are excluded).
+	 * For each way money leaves this method
 	 * gets that money out source and adds it to a running net of money out at the specified freq and within a considerable date.
 	 * Returns a map from a source to the net money out from that source for the given freq and within the considerable date. 
+	 * 
+	 * (TODO 7/5/2017 - no longer true for credit cards although true for loans and misc payments as payoff only happens once as they cannot be sources?)
 	 * For sources that are sources for debt payments that have payoff specified: it should be noted that the payoff amount is
 	 * excluded from the money out result.(To account for the payoff amount the user would need to consider the debt as a source itself).
 	 * @param bbd - the bad budget data
@@ -2148,6 +2231,27 @@ public class Prediction {
 				else
 				{
 					sourcesMoneyOut.put(accountSource, currSourceMoneyOut + paymentAtFreq);
+				}
+			}
+		}
+		
+		//Consider all transfers (the source of the transfer is included if it is not a savings account)
+		for (MoneyTransfer currTransfer : bbd.getTransfers())
+		{
+			Account source = currTransfer.getSource();
+			if (!(source instanceof SavingsAccount) && 
+					considerableNextDate(chosenDate, currTransfer.getNextTransfer(), currTransfer.getEndDate(), currTransfer.getFrequency()))
+			{
+				Double transferSourceMoneyOut = sourcesMoneyOut.get(source);
+				double sourceFreqAmount = toggle(currTransfer.getAmount(), currTransfer.getFrequency(), freq);
+				
+				if (transferSourceMoneyOut == null)
+				{
+					sourcesMoneyOut.put(source, sourceFreqAmount);
+				}
+				else
+				{
+					sourcesMoneyOut.put(source, transferSourceMoneyOut + sourceFreqAmount);
 				}
 			}
 		}

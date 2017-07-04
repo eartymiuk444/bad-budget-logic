@@ -19,6 +19,9 @@ public class TransactionHistoryItem {
 	public final static String DEBT_DESTINATION_ACTION = "payed to";
 	
 	public final static String BUDGET_ITEM_ADD_BACK_ACTION = "added back from";
+	
+	public final static String TRANSFER_SOURCE_ACTION = "withdrawn from";
+	public final static String TRANSFER_DESTINATION_ACTION = "transferred to";
 		
 	private Date transactionDate;
 	private double transactionAmount;

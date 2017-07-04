@@ -6,7 +6,8 @@ import com.erikartymiuk.badbudgetlogic.budget.BudgetItem;
 
 /**
  * Class representing a users data. All accounts (including savings accounts),
- * all MoneyOwed debts, all MoneyGains.
+ * all MoneyOwed debts, all MoneyGains, all money losses, all money transfers, and
+ * all budget data.
  */
 public class BadBudgetData 
 {
@@ -14,12 +15,13 @@ public class BadBudgetData
 	private HashMap<String, MoneyOwed> debts; //All the user's MoneyOwed (debts) as a map
 	private HashMap<String, MoneyGain> gains; //All the user's MoneyGains as a map
 	private HashMap<String, MoneyLoss> losses; //All the user's MoneyLosses as a map
+	private HashMap<String, MoneyTransfer> transfers; //All the user's MoneyTransfers as a map
 	
 	private Budget budget;	//The user's budget
 	
 	/**
-	 * BadBudgetData constructor. Sets up all accounts, debts, and gains
-	 * as empty. Any accounts, debts, and gains need to be added individually.
+	 * BadBudgetData constructor. Sets up all accounts, debts, gains, losses,
+	 * and transfers as empty. Any accounts, debts, and gains need to be added individually.
 	 * The budget (and budgetItems) also needs to be added separately.
 	 */
 	public BadBudgetData()
@@ -28,6 +30,7 @@ public class BadBudgetData
 		this.debts = new HashMap<String, MoneyOwed>();
 		this.gains = new HashMap<String, MoneyGain>();
 		this.losses = new HashMap<String, MoneyLoss>();
+		this.transfers = new HashMap<String, MoneyTransfer>();
 		
 		this.budget = null;
 	}
@@ -93,6 +96,15 @@ public class BadBudgetData
 		this.losses.put(loss.expenseDescription(), loss);
 	}
 	
+	/**
+	 * Add this transfer to the Data's list (map) of transfers
+	 * @param transfer - the MoneyTransfer to add
+	 */
+	public void addTransfer(MoneyTransfer transfer)
+	{
+		this.transfers.put(transfer.getTransferDescription(), transfer);
+	}
+	
 	/*
 	 * Getters
 	 */
@@ -132,6 +144,15 @@ public class BadBudgetData
 	public ArrayList<MoneyLoss> getLosses()
 	{
 		return new ArrayList<MoneyLoss>(this.losses.values());
+	}
+	
+	/**
+	 * Returns a list of this bb data's transfers in no particular order
+	 * @return - a list of transfers
+	 */
+	public ArrayList<MoneyTransfer> getTransfers()
+	{
+		return new ArrayList<MoneyTransfer>(this.transfers.values());
 	}
 	
 	/* 
@@ -184,6 +205,17 @@ public class BadBudgetData
 	public MoneyLoss getLossWithDescription(String description)
 	{
 		return this.losses.get(description);
+	}
+	
+	/**
+	 * Given the description of a transfer, this method returns the transfer object in
+	 * this BB data object, if present.
+	 * @param description - the description of the transfer to search for
+	 * @return - the transfer in this BB data object or null if it isn't present
+	 */
+	public MoneyTransfer getTransferWithDescription(String description)
+	{
+		return this.transfers.get(description);
 	}
 	
 	/**
@@ -260,6 +292,27 @@ public class BadBudgetData
 		
 	}
 	
+	
+	/**
+	 * Given a transfer description (treated as a key) of a transfer, this method attempts to remove
+	 * that transfer from the bad budget data.
+	 * @param description - the description of the transfer to remove
+	 * @return - true if the transfer was successfully found and removed, false if a transfer
+	 * 				with this description could not be removed.
+	 */
+	public boolean deleteTransferWithDescription(String description)
+	{
+		if (this.transfers.remove(description) != null)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}	
+		
+	}
+	
 	/**
 	 * Clears all the prediction data from all the items in this bad budget data object.
 	 */
@@ -276,6 +329,10 @@ public class BadBudgetData
 		for (MoneyLoss ml : this.getLosses())
 		{
 			ml.clearPredictData();
+		}
+		for (MoneyTransfer mt : this.getTransfers())
+		{
+			mt.clearPredictData();
 		}
 		for (MoneyOwed mo : this.getDebts())
 		{

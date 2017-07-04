@@ -145,6 +145,30 @@ public class BadBudgetInvalidValueException extends Exception {
 	 public static final String LOSS_NEXT_LOSS_END_DATE_MISMATCH_E8 = "Next loss not null and frequency one time but next loss doesn't match end date";
 	 public static final String LOSS_SOURCE_NOT_SET_E6 = "Source isn't set";
 	 
+	 /* Money Transfer error messages 
+	  * 
+	 *		0 - Values are valid
+	 *		9 - Transfer description is not set
+	 * 		1 - Source is not set
+	 * 		2 - Destination is not set
+	 * 		3 - Source is not a savings account (a regular account), but destination is a savings account (this is reserved for contributions)
+	 * 		4 - Amount is a negative value
+	 * 		5 - Frequency is not set
+	 * 		6 - Frequency is one time but end date is null (indicating ongoing)
+	 * 		7 - Next transfer is null but frequency is not one time
+	 * 		8 - Next transfer is not null and frequency is one time but end date doesn't match next transfer
+	  * */
+	 public static final String TRANSFER_SOURCE_NOT_SET_E1 = "Source is not set";
+	 public static final String TRANSFER_DESTINATION_NOT_SET_E2 = "Destination is not set";
+	 public static final String TRANSFER_CONTRIBUTION_RESERVED_E3 = "Source is a regular account and destination is a savings account; this is reserved for contributions";
+	 public static final String TRANSFER_AMOUNT_NEGATIVE_E4= "Amount is a negative value";
+	 public static final String TRANSFER_FREQUENCY_NOT_SET_E5 = "Frequency is not set";
+	 public static final String TRANSFER_ONETIME_END_NULL_E6 = "Frequency is one time but end date is null (indicating ongoing)";
+	 public static final String TRANSFER_NEXT_DEPOSIT_NULL_NOT_ONE_TIME_E7 = "Next transfer is null but frequency is not one time";
+	 public static final String TRANSFER_ONE_TIME_NEXT_DEPOSIT_MISMATCH_END_E8 = "Next transfer is not null and frequency is one time but end date doesn't match next transfer";
+	 public static final String TRANSFER_DESCRIPTION_NOT_SET_E9 = "Transfer description is not set";
+
+	 
 	 /* Budget Item error messages */
 	 public static final String BUDGET_ITEM_PRORATED_ERROR_E1 = "The prorated item does not have a frequency of weekly, monthly, or yearly";
 	 
