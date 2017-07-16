@@ -174,6 +174,9 @@ public class BadBudgetInvalidValueException extends Exception {
 	 
 	 /* Budget error messages */
 	 public static final String BUDGET_SOURCE_NOT_SET_E1 = "Budget source is not set";
+	 
+	 /* Loan specific error messages */
+	 public static final String LOAN_PRINCIPAL_GREATER_DEBT = "Simple interest loan has principal greater than debt amount";
 
 	/**
 	 * Constructor for BadBudgetInvalidValueException
