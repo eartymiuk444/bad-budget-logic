@@ -13,12 +13,13 @@ public class PredictDataLoan extends PredictDataMoneyOwed {
 	 * @param value - the value on the date
 	 * @param nextDate - the next payment date to initialize this to
 	 * @param nextInterestAccumulationDate - the next date interest should accumulate
+	 * @param accumulatedInterest - the accumulated interest on this date
 	 * @param principal - the principal amount of this loan on the date
 	 * @param interest - the interest of the loan on this date
 	 */
-	public PredictDataLoan(Date date, double value, Date nextDate, Date nextInterestAccumulationDate, double principal, double interest)
+	public PredictDataLoan(Date date, double value, Date nextDate, Date nextInterestAccumulationDate, double accumulatedInterest, double principal, double interest)
 	{
-		super(date, value, nextDate, nextInterestAccumulationDate);
+		super(date, value, nextDate, nextInterestAccumulationDate, accumulatedInterest);
 		this.principal = principal;
 		this.interest = interest;
 	}

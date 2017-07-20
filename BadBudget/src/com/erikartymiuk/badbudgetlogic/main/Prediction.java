@@ -331,6 +331,9 @@ public class Prediction {
 					Date nextInterestDate = pdsa.getNextInterestAccumulationDate();
 					if (Prediction.datesEqualUpToDay(rowDate, nextInterestDate))
 					{
+						double interest = pdsa.value() * (currSavingsAccount.getInterestRate()/12.0);
+						pdsa.setAccumulatedInterest(pdsa.getAccumulatedInterest()+interest);
+						
 						pdsa.updateValue(pdsa.value() + pdsa.value() * currSavingsAccount.getInterestRate()/12.0);
 						Calendar cal = Calendar.getInstance();
 						cal.setTime(nextInterestDate);
@@ -361,7 +364,11 @@ public class Prediction {
 				{
 					if (currDebt instanceof CreditCard)
 					{
-						CreditCard currCreditCard = (CreditCard) currDebt;						
+						CreditCard currCreditCard = (CreditCard) currDebt;
+						
+						double interest = predictDataAll.value() * (currCreditCard.interestRate()/NUM_DAYS_IN_YEAR);
+						predictDataAll.setAccumulatedInterest(predictDataAll.getAccumulatedInterest()+interest);
+						
 						predictDataAll.updateValue(predictDataAll.value() * (1+currCreditCard.interestRate()/NUM_DAYS_IN_YEAR));
 					}
 					else if (currDebt instanceof Loan)
@@ -373,12 +380,16 @@ public class Prediction {
 						{
 							double simpleInterest = pdl.getPrincipal() * (currLoan.interestRate()/NUM_DAYS_IN_YEAR);
 							
+							pdl.setAccumulatedInterest(pdl.getAccumulatedInterest()+simpleInterest);
+							
 							pdl.updateValue(pdl.value() + simpleInterest);
 							pdl.setInterest(pdl.getInterest()+simpleInterest);
 						}
 						else
 						{	
 							double compoundedInterest = pdl.value() * currLoan.interestRate()/NUM_DAYS_IN_YEAR;
+							
+							pdl.setAccumulatedInterest(pdl.getAccumulatedInterest()+compoundedInterest);
 							
 							pdl.updateValue(pdl.value() + compoundedInterest);
 							pdl.setPrincipal(pdl.value());
@@ -388,6 +399,10 @@ public class Prediction {
 					else
 					{
 						PredictDataMoneyOwed pdmo = currDebt.getPredictData(dayIndex);
+						
+						double interest = pdmo.value() * (currDebt.interestRate()/NUM_DAYS_IN_YEAR);
+						pdmo.setAccumulatedInterest(pdmo.getAccumulatedInterest()+interest);
+						
 						pdmo.updateValue(currDebt.amount() * (1+currDebt.interestRate()/NUM_DAYS_IN_YEAR));
 					}
 					
@@ -639,7 +654,7 @@ public class Prediction {
 					firstOfNextMonth.add(Calendar.MONTH, 1);
 										
 					PredictDataSavingsAccount firstRow = new PredictDataSavingsAccount(startingDate, 
-																						sa.value(), sa.nextContribution(), firstOfNextMonth.getTime(), false);
+																						sa.value(), sa.nextContribution(), firstOfNextMonth.getTime(), 0, false);
 					sa.setPredictData(dayIndex, firstRow);
 					//sa.addPredictData(firstRow);
 				}
@@ -647,7 +662,8 @@ public class Prediction {
 				{
 					PredictDataSavingsAccount yesterdayRow = sa.getPredictData(dayIndex - 1);
 					PredictDataSavingsAccount newRow = new PredictDataSavingsAccount(addDays(yesterdayRow.date(), 1), yesterdayRow.value(), 
-																					yesterdayRow.getNextContributionDate(), yesterdayRow.getNextInterestAccumulationDate(), yesterdayRow.isValueChangedByTransfer());
+																					yesterdayRow.getNextContributionDate(), yesterdayRow.getNextInterestAccumulationDate(), 
+																					yesterdayRow.getAccumulatedInterest(), yesterdayRow.isValueChangedByTransfer());
 					sa.setPredictData(dayIndex, newRow);
 					//sa.addPredictData(newRow);
 				}
@@ -724,11 +740,11 @@ public class Prediction {
 					
 					if (currDebt.payment() == null)
 					{
-						pdmo = new PredictDataMoneyOwed(startingDate, currDebt.amount(), null, tmrwCal.getTime());
+						pdmo = new PredictDataMoneyOwed(startingDate, currDebt.amount(), null, tmrwCal.getTime(), 0);
 					}
 					else
 					{
-						pdmo = new PredictDataMoneyOwed(startingDate, currDebt.amount(), currDebt.payment().nextPaymentDate(), tmrwCal.getTime());
+						pdmo = new PredictDataMoneyOwed(startingDate, currDebt.amount(), currDebt.payment().nextPaymentDate(), tmrwCal.getTime(), 0);
 					}
 					
 					//currDebt.addPredictData(pdmo);
@@ -738,7 +754,7 @@ public class Prediction {
 				{
 					PredictDataMoneyOwed yesterdayRow = currDebt.getPredictData(dayIndex - 1);
 					PredictDataMoneyOwed newRow = new PredictDataMoneyOwed(addDays(yesterdayRow.date(), 1), yesterdayRow.value(), 
-							yesterdayRow.getNextPaymentDate(), yesterdayRow.getNextInterestAccumulationDate());
+							yesterdayRow.getNextPaymentDate(), yesterdayRow.getNextInterestAccumulationDate(), yesterdayRow.getAccumulatedInterest());
 					//currDebt.addPredictData(newRow);
 					currDebt.setPredictData(dayIndex, newRow);
 				}
@@ -764,12 +780,12 @@ public class Prediction {
 					
 					if (currLoan.interestRate() != 0 && currLoan.isSimpleInterest())
 					{
-						pdl = new PredictDataLoan(startingDate, currLoan.amount(), tempNextPayment, tmrwCal.getTime(), 
+						pdl = new PredictDataLoan(startingDate, currLoan.amount(), tempNextPayment, tmrwCal.getTime(), 0,
 								currLoan.getPrincipalBalance(), currLoan.getInterestAmount());
 					}
 					else
 					{
-						pdl = new PredictDataLoan(startingDate, currLoan.amount(), tempNextPayment, tmrwCal.getTime(),
+						pdl = new PredictDataLoan(startingDate, currLoan.amount(), tempNextPayment, tmrwCal.getTime(), 0,
 								currLoan.amount(), 0);
 					}
 					currLoan.setPredictData(dayIndex, pdl);
@@ -778,7 +794,7 @@ public class Prediction {
 				{
 					PredictDataLoan yesterdayRow = currLoan.getPredictData(dayIndex - 1);
 					PredictDataLoan newRow = new PredictDataLoan(addDays(yesterdayRow.date(), 1), 
-							yesterdayRow.value(), yesterdayRow.getNextPaymentDate(), yesterdayRow.getNextInterestAccumulationDate(), 
+							yesterdayRow.value(), yesterdayRow.getNextPaymentDate(), yesterdayRow.getNextInterestAccumulationDate(), yesterdayRow.getAccumulatedInterest(),
 							yesterdayRow.getPrincipal(), yesterdayRow.getInterest());
 					currLoan.setPredictData(dayIndex, newRow);
 				}

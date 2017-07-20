@@ -10,19 +10,22 @@ public class PredictDataMoneyOwed extends PredictDataAccount
 	private Date nextPaymentDate; //The next payment date
 	private Date nextInterestAccumulationDate;
 	
-	
+	private double accumulatedInterest;
+
 	/**
 	 * Constructor for the predict data money owed object. 
 	 * @param date - the date this row has data on
 	 * @param value - the value on the date
 	 * @param nextDate - the next payment date to initialize this to
 	 * @param nextInterestAccumulationDate - the date of the next interest accumulation
+	 * @param accumulatedInterest - the accumulated interest on the date
 	 */
-	public PredictDataMoneyOwed(Date date, double value, Date nextDate, Date nextInterestAccumulationDate)
+	public PredictDataMoneyOwed(Date date, double value, Date nextDate, Date nextInterestAccumulationDate, double accumulatedInterest)
 	{
 		super(date, value);
 		this.nextPaymentDate = nextDate;
 		this.nextInterestAccumulationDate = nextInterestAccumulationDate;
+		this.accumulatedInterest = accumulatedInterest;
 	}
 	
 	/** Method to update the date a payment will next be processed. 
@@ -47,6 +50,19 @@ public class PredictDataMoneyOwed extends PredictDataAccount
 
 	public void setNextInterestAccumulationDate(Date nextInterestAccumulationDate) {
 		this.nextInterestAccumulationDate = nextInterestAccumulationDate;
+	}
+	
+	/**
+	 * This gets the total accumulated interest throughout the history (i.e. from the start day of the prediction up
+	 * to the day represented by this predict data row) for the debt.
+	 * @return - the total accumulated interest up to the day this row represents for the debt attached to the predict data.
+	 */
+	public double getAccumulatedInterest() {
+		return accumulatedInterest;
+	}
+
+	public void setAccumulatedInterest(double accumulatedInterest) {
+		this.accumulatedInterest = accumulatedInterest;
 	}
 	
 }
