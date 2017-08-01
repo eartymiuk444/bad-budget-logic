@@ -2393,6 +2393,10 @@ public class Prediction {
 		{
 			currAccount.update(dayIndex);
 		}
+		for (MoneyTransfer currTransfer : bbd.getTransfers())
+		{
+			currTransfer.update(dayIndex);
+		}
 		for (MoneyOwed currDebt : bbd.getDebts())
 		{
 			currDebt.update(endDate, dayIndex);
@@ -2438,6 +2442,10 @@ public class Prediction {
 		for (Account currAccount : bbd.getAccounts())
 		{
 			currAccount.updateNextDatesOnly(dayIndex);
+		}
+		for (MoneyTransfer currTransfer : bbd.getTransfers())
+		{
+			currTransfer.updateNextDatesOnly(dayIndex);
 		}
 		for (MoneyOwed currDebt : bbd.getDebts())
 		{
