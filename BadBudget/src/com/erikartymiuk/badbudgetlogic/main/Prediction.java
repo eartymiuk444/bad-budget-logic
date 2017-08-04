@@ -2366,6 +2366,82 @@ public class Prediction {
 	}
 	
 	/**
+	 * Finds the total interest change rate for savings accounts at freq on the specified dayIndex.
+	 * 
+	 * @param bbd - the bad budget data to get the savings accounts from
+	 * @param dayIndex - the specified day
+	 * @param freq - the frequency to use
+	 * @return The total interest change rate for all savings accounts at freq on the specified dayIndex.
+	 */
+	public static double analyzeInterestChangeSavings(BadBudgetData bbd, int dayIndex, Frequency freq)
+	{
+		double totalChangeAtFreq = 0;
+		for (Account currAccount : bbd.getAccounts())
+		{
+			if (currAccount instanceof SavingsAccount)
+			{
+				SavingsAccount sa = (SavingsAccount)currAccount;
+				totalChangeAtFreq += analyzeInterestChangeRateForDayIndex(sa, dayIndex, freq);
+			}
+		}
+		return totalChangeAtFreq;
+	}
+	
+	/**
+	 * Finds the total interest change rate for debts at freq on the specified dayIndex.
+	 * 
+	 * @param bbd - the bad budget data to get the debts from
+	 * @param dayIndex - the specified day
+	 * @param freq - the frequency to use
+	 * @return The total interest change rate for all debts at freq on the specified dayIndex.
+	 */
+	public static double analyzeInterestChangeDebts(BadBudgetData bbd, int dayIndex, Frequency freq)
+	{
+		double totalChangeAtFreq = 0;
+		for (MoneyOwed debt : bbd.getDebts())
+		{
+			totalChangeAtFreq += analyzeInterestChangeRateForDayIndex(debt, dayIndex, freq);
+		}
+		return totalChangeAtFreq;
+	}
+	
+	/**
+	 * Private helper method that gets the interest change rate for a savings account on the day represented by
+	 * dayIndex at the specified freq. Must have a prediction run prior to calling this method up to the day
+	 * specified by dayIndex.
+	 * @param sa - the savings account to consider
+	 * @param dayIndex - the day to find the interest change rate for
+	 * @param freq - the frequency to use for the interest change rate.
+	 * @return - the interest change rate for the specified savings account on the specified day
+	 */
+	private static double analyzeInterestChangeRateForDayIndex(SavingsAccount sa, int dayIndex, Frequency freq)
+	{
+		double value = sa.getPredictData(dayIndex).value();
+		double interestRate = sa.getInterestRate();
+		
+		double dailyInterestChange = value * (interestRate/NUM_DAYS_IN_YEAR);
+		return toggle(dailyInterestChange, Frequency.daily, freq);
+	}
+	
+	/**
+	 * Private helper method that gets the interest change rate for a debt on the day represented by
+	 * dayIndex at the specified freq. Must have a prediction run prior to calling this method up to the day
+	 * specified by dayIndex.
+	 * @param debt to consider
+	 * @param dayIndex - the day to find the interest change rate for
+	 * @param freq - the frequency to use for the interest change rate.
+	 * @return - the interest change rate for the specified debt on the specified day
+	 */
+	private static double analyzeInterestChangeRateForDayIndex(MoneyOwed debt, int dayIndex, Frequency freq)
+	{
+		double debtValue = debt.getPredictData(dayIndex).value();
+		double interestRate = debt.interestRate();
+		
+		double dailyInterestChange = debtValue * (interestRate/NUM_DAYS_IN_YEAR);
+		return toggle(dailyInterestChange, Frequency.daily, freq);
+	}
+	
+	/**
 	 * Runs a prediction from currDate to endDate. Considers remainAmounts if
 	 * auto reset is on.
 	 * Uses the results of this prediction to update all of 
